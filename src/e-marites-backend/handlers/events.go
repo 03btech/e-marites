@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +13,75 @@ import (
 	"github.com/03btech/e-marites-backend/models"
 	"github.com/google/uuid"
 )
+
+type CommunityEvent struct {
+	EventID             int       `json:"event_id"`
+	EventType           string    `json:"event_type"`
+	Severity            string    `json:"severity"` // Will hold 'Low', 'Medium', 'High' from DB
+	Description         string    `json:"description"`
+	LocationDescription string    `json:"location_description"`
+	Latitude            *float64  `json:"latitude"`  // Use pointers to handle potential NULL
+	Longitude           *float64  `json:"longitude"` // Use pointers to handle potential NULL
+	Status              string    `json:"status"`
+	CreatedAt           time.Time `json:"created_at"`
+	// Add other fields as needed
+}
+
+// Handler function to get community events
+func GetCommunityEvents(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	w.Header().Set("Content-Type", "application/json")
+
+	query := `
+		SELECT
+			event_id, event_type, severity::text, description, location_description,
+			ST_Y(coordinates::geometry) as latitude,  -- Cast to geometry for ST_Y (Latitude)
+			ST_X(coordinates::geometry) as longitude, -- Cast to geometry for ST_X (Longitude)
+			status::text, created_at
+		FROM community_reported_events
+		WHERE coordinates IS NOT NULL
+		ORDER BY created_at DESC` // Or any other ordering you prefer
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Printf("Database query error: %v", err)
+		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	events := []CommunityEvent{}
+	for rows.Next() {
+		var event CommunityEvent
+		// Scan latitude and longitude directly
+		if err := rows.Scan(
+			&event.EventID, &event.EventType, &event.Severity, &event.Description,
+			&event.LocationDescription, &event.Latitude, &event.Longitude,
+			&event.Status, &event.CreatedAt,
+		); err != nil {
+			log.Printf("Error scanning event row: %v", err)
+			continue // Skip problematic row
+		}
+		// Only add events where coordinates were successfully scanned (not NULL)
+		if event.Latitude != nil && event.Longitude != nil {
+			events = append(events, event)
+		} else {
+			log.Printf("Skipping event ID %d due to NULL coordinates after scan", event.EventID)
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Printf("Error after iterating event rows: %v", err)
+		http.Error(w, "Failed to process events", http.StatusInternalServerError)
+		return
+	} else {
+		log.Printf("Successfully fetched and encoded %d community events", len(events))
+	}
+
+	if err := json.NewEncoder(w).Encode(events); err != nil {
+		log.Printf("Error encoding events to JSON: %v", err)
+		http.Error(w, "Failed to encode events", http.StatusInternalServerError)
+	}
+}
 
 func SubmitEventReport(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	w.Header().Set("Content-Type", "application/json")

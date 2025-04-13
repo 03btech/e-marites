@@ -6,25 +6,88 @@ document.addEventListener("DOMContentLoaded", function () {
     fullscreenControl: true,
   });
 
-  // Custom icons
+  // Custom icons (Adjust keys to match event_type and severity from backend)
   const icons = {
-    Flooding_low: L.icon({
+    Flooding_High: L.icon({
       iconUrl: "./js/leaflet/images/high.svg",
       iconSize: [30, 41],
       iconAnchor: [12, 41],
       popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png", // Path to your shadow image
+      shadowSize: [41, 41], // Size of the shadow
+      shadowAnchor: [12, 41], // The same as the icon's anchor for a typical shadow
     }),
-    Landslide_low: L.icon({
+    Flooding_Medium: L.icon({
       iconUrl: "./js/leaflet/images/medium.svg",
       iconSize: [30, 41],
       iconAnchor: [12, 41],
       popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
     }),
-    Vehicular_Accident_: L.icon({
+    Flooding_Low: L.icon({
       iconUrl: "./js/leaflet/images/low.svg",
       iconSize: [30, 41],
       iconAnchor: [12, 41],
       popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
+    }),
+    Landslide_High: L.icon({
+      iconUrl: "./js/leaflet/images/high.svg",
+      iconSize: [30, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
+    }),
+    Landslide_Medium: L.icon({
+      iconUrl: "./js/leaflet/images/medium.svg",
+      iconSize: [30, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
+    }),
+    Landslide_Low: L.icon({
+      iconUrl: "./js/leaflet/images/low.svg",
+      iconSize: [30, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
+    }),
+    Accident_High: L.icon({
+      iconUrl: "./js/leaflet/images/high.svg",
+      iconSize: [30, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
+    }),
+    Accident_Medium: L.icon({
+      iconUrl: "./js/leaflet/images/medium.svg",
+      iconSize: [30, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
+    }),
+    Accident_Low: L.icon({
+      iconUrl: "./js/leaflet/images/low.svg",
+      iconSize: [30, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -35],
+      shadowUrl: "./js/leaflet/images/marker-shadow.png",
+      shadowSize: [41, 41],
+      shadowAnchor: [12, 41],
     }),
   };
 
@@ -54,13 +117,15 @@ document.addEventListener("DOMContentLoaded", function () {
         button,
         "click",
         function () {
-          const elem = document.getElementById("map-container").parentElement;
+          const elem = document.getElementById("map-container");
           if (!document.fullscreenElement) {
             elem.requestFullscreen().catch((err) => {
               console.error(`Fullscreen error: ${err.message}`);
             });
           } else {
-            document.exitFullscreen();
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            }
           }
         }
       );
@@ -70,65 +135,100 @@ document.addEventListener("DOMContentLoaded", function () {
 
   map.addControl(new L.Control.Fullscreen());
 
-  // Sample mishap data (replace with real data)
-  const mishaps = [
-    {
-      type: "Flooding",
-      coords: [10.641, 122.968],
-      date: "2025-04-04 08:30",
-      details: "Severe flooding in Barangay Poblacion",
-      severity: "High",
-    },
-    {
-      type: "Accident",
-      coords: [10.643, 122.97],
-      date: "2025-04-04 09:15",
-      details: "Vehicle collision near market",
-      severity: "Medium",
-    },
-    {
-      type: "Landslide",
-      coords: [10.638, 122.965],
-      date: "2025-04-04 10:45",
-      details: "Landslide blocking mountain road",
-      severity: "High",
-    },
-  ];
-
   // Add markers to map
   function addMarkers(data) {
     const defaultIcon = new L.Icon.Default();
 
-    data.forEach((mishap) => {
+    data.forEach((event) => {
+      if (
+        typeof event.latitude !== "number" ||
+        typeof event.longitude !== "number"
+      ) {
+        console.warn(
+          `Skipping event ID ${event.event_id} due to invalid coordinates:`,
+          event.latitude,
+          event.longitude
+        );
+        return;
+      }
+
       try {
-        const marker = L.marker(mishap.coords, {
-          icon: icons[concat(mishap.type, "_", mishap.severity)] || defaultIcon,
+        const coords = [event.latitude, event.longitude];
+        const iconKey = `${event.event_type}_${event.severity}`;
+        const markerIcon = icons[iconKey] || defaultIcon;
+
+        const marker = L.marker(coords, {
+          icon: markerIcon,
         }).addTo(map);
 
-        marker.bindPopup(`
-        <b>${mishap.type.toUpperCase()}</b><br>
-        <small>${mishap.date}</small><br>
-        ${mishap.details}<br>
-        <span class="badge bg-${
-          mishap.severity === "High" ? "danger" : "warning"
-        }">
-          ${mishap.severity.toUpperCase()} PRIORITY
-        </span>
-      `);
+        const eventDate = new Date(event.created_at).toLocaleString();
 
-        console.log(`Marker added at ${mishap.coords}`);
+        let badgeClass = "bg-secondary";
+        if (event.severity === "High") {
+          badgeClass = "bg-danger";
+        } else if (event.severity === "Medium") {
+          badgeClass = "bg-warning";
+        } else if (event.severity === "Low") {
+          badgeClass = "bg-info";
+        }
+
+        marker.bindPopup(`
+          <b>${event.event_type.toUpperCase()}</b><br>
+          <small>Reported: ${eventDate}</small><br>
+          Details: ${event.description || "N/A"}<br>
+          Location: ${event.location_description || "N/A"}<br>
+          Status: ${event.status || "N/A"}<br>
+          <span class="badge ${badgeClass}">
+            ${event.severity.toUpperCase()} PRIORITY
+          </span>
+        `);
+
+        console.log(`Marker added for event ID ${event.event_id} at ${coords}`);
       } catch (error) {
-        console.error(`Error creating marker: ${error}`);
+        console.error(
+          `Error creating marker for event ID ${event.event_id}: ${error}`
+        );
       }
     });
   }
 
-  // Initial load
-  addMarkers(mishaps);
+  // Fetch event data from the backend
+  function fetchEvents() {
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker) {
+        map.removeLayer(layer);
+      }
+    });
+    fetch("/api/community-events")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Fetched events:", data);
+        if (Array.isArray(data)) {
+          addMarkers(data);
+        } else {
+          console.error("Fetched data is not an array:", data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching event data:", error);
+        alert(
+          "Failed to load event data. Please check the connection or try again later."
+        );
+      });
+  }
+
+  // Initial load of events
+  fetchEvents();
 
   // Offline detection
   function updateOnlineStatus() {
     const status = document.getElementById("online-status");
+    if (!status) return;
     if (navigator.onLine) {
       status.innerHTML = '<i class="bi bi-wifi"></i> Online';
       status.className = "text-success";
@@ -143,13 +243,41 @@ document.addEventListener("DOMContentLoaded", function () {
   updateOnlineStatus();
 
   // Sync button functionality
-  document.getElementById("sync-button").addEventListener("click", () => {
-    if (navigator.onLine) {
-      // Implement your sync logic here
-      console.log("Syncing data...");
-      alert("Data sync initiated");
-    } else {
-      alert("Cannot sync while offline");
+  const syncButton = document.getElementById("sync-button");
+  let syncInterval = null;
+
+  if (syncButton) {
+    syncButton.addEventListener("click", () => {
+      if (navigator.onLine) {
+        if (syncInterval) {
+          // If already syncing, stop the interval
+          clearInterval(syncInterval);
+          syncInterval = null;
+          syncButton.innerHTML = '<i class="bi bi-arrow-repeat"></i> Sync Data';
+          console.log("Stopped automatic sync");
+          alert("Automatic sync stopped");
+        } else {
+          // Start syncing every second
+          syncInterval = setInterval(fetchEvents, 5000); // 1000ms = 1 second
+          syncButton.innerHTML = '<i class="bi bi-stop-fill"></i> Stop Sync';
+          console.log("Started automatic sync");
+          alert("Automatic sync started - refreshing every second");
+
+          // Initial immediate refresh
+          fetchEvents();
+        }
+      } else {
+        alert("Cannot sync while offline");
+      }
+    });
+  } else {
+    console.warn("Sync button element not found.");
+  }
+
+  // Make sure to clear the interval when the page is unloaded
+  window.addEventListener("beforeunload", function () {
+    if (syncInterval) {
+      clearInterval(syncInterval);
     }
   });
 });

@@ -163,7 +163,39 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      // Update current date and time (same as signup.html)
+      // Function to check if user is already logged in
+      async function checkLoggedIn() {
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+          return false; // No token found
+        }
+
+        try {
+          // Verify the token with the backend
+          const response = await fetch("/api/verify-session", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          return response.ok; // Returns true if token is valid
+        } catch (error) {
+          console.error("Error verifying session:", error);
+          return false;
+        }
+      }
+
+      // Redirect if already logged in
+      document.addEventListener("DOMContentLoaded", async function () {
+        const isLoggedIn = await checkLoggedIn();
+        if (isLoggedIn) {
+          window.location.href = "index.html";
+        }
+      });
+
+      // Update current date and time
       function updateDateTime() {
         const now = new Date();
 
@@ -225,8 +257,13 @@
               throw new Error(data.error || "Login failed");
             }
 
-            // Store the token (you might want to use more secure storage)
+            // Store the token
             localStorage.setItem("authToken", data.token);
+
+            // Store username if available
+            if (data.username) {
+              localStorage.setItem("username", data.username);
+            }
 
             // Redirect to dashboard
             window.location.href = "index.html";
@@ -248,6 +285,7 @@
           }
         });
 
+      // Toggle password visibility
       document
         .getElementById("togglePassword")
         .addEventListener("click", function () {

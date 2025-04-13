@@ -40,6 +40,15 @@ func main() {
 		handlers.SubmitEventReport(w, r, db.DB)
 	}).Methods("POST")
 
+	// *** ADD THIS NEW ENDPOINT for fetching community events (GET) ***
+	apiRouter.HandleFunc("/community-events", func(w http.ResponseWriter, r *http.Request) {
+		if db.DB == nil {
+			http.Error(w, "Database connection not available", http.StatusInternalServerError)
+			return
+		}
+		handlers.GetCommunityEvents(w, r, db.DB) // Call the new handler
+	}).Methods("GET") // Specify GET method
+
 	apiRouter.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
 		if db.DB == nil {
 			http.Error(w, "Database connection not available", http.StatusInternalServerError)
