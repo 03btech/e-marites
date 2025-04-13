@@ -1,0 +1,27 @@
+# Dependencies
+/node_modules
+/vendor/
+
+# Build output
+/dist/
+*.exe
+*.test
+*.out
+
+# Cache
+/.parcel-cache/
+
+# Environment variables
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor folders
+.vscode/
+.idea/
+
+# Temporary/Backup files
+* copy.sql
+

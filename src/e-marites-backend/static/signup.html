@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="icon" href="assets/images/megaphone.svg" type="image/x-icon" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account - Rural Community Mishaps System</title>
+    <!-- Bootstrap 5.3.5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .signup-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .signup-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+      }
+      .signup-title {
+        color: #283444;
+        font-weight: 600;
+      }
+      .form-section {
+        margin-bottom: 1.5rem;
+      }
+      .form-section h5 {
+        color: #283444;
+        margin-bottom: 1rem;
+      }
+      .btn-signup {
+        background-color: #283444;
+        color: white;
+        padding: 0.5rem 2rem;
+        font-weight: 500;
+      }
+      .btn-signup:hover {
+        background-color: #1e293b;
+        color: white;
+      }
+      .info-bar {
+        background-color: #283444;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-wrap: wrap; /* Allows items to wrap */
+        gap: 15px; /* Space between items */
+        justify-content: center; /* Center items when they wrap */
+        align-items: center;
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap; /* Prevent text from breaking */
+      }
+      .info-icon {
+        font-size: 1.1rem;
+      }
+      .password-strength {
+        height: 5px;
+        background-color: #e9ecef;
+        margin-top: 5px;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s, background-color 0.3s;
+      }
+      .form-text.password-requirements {
+        font-size: 0.8rem;
+        color: #6c757d;
+      }
+      .profile-image-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #dee2e6;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Info Bar -->
+      <div class="info-bar">
+        <div class="info-item">
+          <i class="bi bi-calendar info-icon"></i>
+          <span id="current-date">Loading date...</span>
+        </div>
+        <div class="info-item">
+          <i class="bi bi-geo-alt-fill info-icon"></i>
+          <span>BARANGAY POBLACION, CAUAYAN NEGROS OCCIDENTAL</span>
+        </div>
+        <div class="info-item">
+          <i class="bi bi-clock-fill info-icon"></i>
+          <span id="current-time">Loading time...</span>
+        </div>
+      </div>
+
+      <!-- Signup Card -->
+      <div class="signup-container">
+        <div class="signup-header">
+          <h2 class="signup-title">
+            <i class="bi bi-person-plus-fill me-2"></i>Create Your Account
+          </h2>
+          <p class="text-muted">
+            Join the Rural Community Mishaps Reporting System
+          </p>
+        </div>
+
+        <form id="signupForm">
+          <!-- Profile Image -->
+          <div class="mb-3 text-center">
+            <img
+              src="assets/images/default_avatar.svg"
+              alt="Profile preview"
+              class="profile-image-preview"
+              id="profileImagePreview"
+            />
+            <div class="d-flex justify-content-center">
+              <input
+                type="file"
+                class="form-control d-none"
+                id="profileImage"
+                accept="image/*"
+                title="Upload your profile image"
+                placeholder="Choose a file"
+              />
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                onclick="document.getElementById('profileImage').click()"
+              >
+                <i class="bi bi-camera-fill me-1"></i>Upload Photo
+              </button>
+            </div>
+          </div>
+
+          <!-- Account Information -->
+          <div class="form-section">
+            <h5><i class="bi bi-person-circle me-2"></i>Account Information</h5>
+            <div class="mb-3">
+              <label for="username" class="form-label">Username*</label>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                required
+                placeholder="Choose a username"
+              />
+              <div class="form-text">
+                Must be unique and 4-50 characters long
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email Address*</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                required
+                placeholder="your.email@example.com"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Password*</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                required
+                placeholder="Create a strong password"
+              />
+              <div class="password-strength">
+                <div
+                  class="password-strength-bar"
+                  id="passwordStrengthBar"
+                ></div>
+              </div>
+              <div class="form-text password-requirements">
+                Password must contain at least 8 characters, including
+                uppercase, lowercase, numbers, and special characters
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label"
+                >Confirm Password*</label
+              >
+              <input
+                type="password"
+                class="form-control"
+                id="confirmPassword"
+                required
+                placeholder="Re-enter your password"
+              />
+              <div class="invalid-feedback">Passwords do not match</div>
+            </div>
+          </div>
+
+          <!-- Personal Information -->
+          <div class="form-section">
+            <h5><i class="bi bi-card-text me-2"></i>Personal Information</h5>
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Full Name*</label>
+              <input
+                type="text"
+                class="form-control"
+                id="fullName"
+                required
+                placeholder="Juan Dela Cruz"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label">Phone Number</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="phone"
+                placeholder="09123456789"
+              />
+              <div class="form-text">
+                Include country code if outside Philippines
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="role" class="form-label">Account Type*</label>
+              <select class="form-select" id="role" required>
+                <option value="reporter" selected>Community Reporter</option>
+                <option value="responder">Emergency Responder</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="mb-4 form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="termsAgreement"
+              required
+            />
+            <label class="form-check-label" for="termsAgreement"
+              >I agree to the <a href="#">Terms of Service</a> and
+              <a href="#">Privacy Policy</a></label
+            >
+          </div>
+
+          <!-- Submission Section -->
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-signup">
+              <i class="bi bi-person-check-fill me-1"></i> Create Account
+            </button>
+            <div class="text-center mt-3">
+              Already have an account?
+              <a href="login.html">Sign in here</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Bootstrap 5.3.5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Update current date and time
+      function updateDateTime() {
+        const now = new Date();
+
+        // Format date (e.g., APRIL 04, 2025)
+        const options = { month: "long", day: "2-digit", year: "numeric" };
+        document.getElementById("current-date").textContent = now
+          .toLocaleDateString("en-US", options)
+          .toUpperCase();
+
+        // Format time (e.g., 14:30)
+        document.getElementById("current-time").textContent = `TIME: ${now
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+      }
+
+      // Update immediately and then every minute
+      updateDateTime();
+      setInterval(updateDateTime, 60000);
+
+      // Password strength indicator
+      document
+        .getElementById("password")
+        .addEventListener("input", function (e) {
+          const password = e.target.value;
+          const strengthBar = document.getElementById("passwordStrengthBar");
+          let strength = 0;
+
+          // Length check
+          if (password.length > 7) strength += 1;
+          if (password.length > 11) strength += 1;
+
+          // Character type checks
+          if (/[A-Z]/.test(password)) strength += 1;
+          if (/[a-z]/.test(password)) strength += 1;
+          if (/[0-9]/.test(password)) strength += 1;
+          if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+          // Update strength bar
+          let width = 0;
+          let color = "#dc3545"; // Red
+
+          if (strength >= 6) {
+            width = 100;
+            color = "#28a745"; // Green
+          } else if (strength >= 4) {
+            width = 75;
+            color = "#ffc107"; // Yellow
+          } else if (strength >= 2) {
+            width = 50;
+            color = "#fd7e14"; // Orange
+          } else if (password.length > 0) {
+            width = 25;
+          }
+
+          strengthBar.style.width = `${width}%`;
+          strengthBar.style.backgroundColor = color;
+        });
+
+      // Password confirmation validation
+      document
+        .getElementById("confirmPassword")
+        .addEventListener("input", function (e) {
+          const password = document.getElementById("password").value;
+          const confirmPassword = e.target.value;
+
+          if (password !== confirmPassword && confirmPassword.length > 0) {
+            e.target.classList.add("is-invalid");
+          } else {
+            e.target.classList.remove("is-invalid");
+          }
+        });
+
+      // Profile image preview
+      document
+        .getElementById("profileImage")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              document.getElementById("profileImagePreview").src =
+                event.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+      // Form submission handler
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Validate password match
+          const password = document.getElementById("password").value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+          if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+          }
+
+          // Validate password strength
+          if (
+            password.length < 8 ||
+            !/[A-Z]/.test(password) ||
+            !/[a-z]/.test(password) ||
+            !/[0-9]/.test(password) ||
+            !/[^A-Za-z0-9]/.test(password)
+          ) {
+            alert("Password does not meet strength requirements");
+            return;
+          }
+
+          // Prepare form data
+          const formData = {
+            username: document.getElementById("username").value,
+            email: document.getElementById("email").value,
+            password: password,
+            full_name: document.getElementById("fullName").value,
+            phone: document.getElementById("phone").value,
+            role: document.getElementById("role").value,
+            profile_image: document.getElementById("profileImagePreview").src,
+            terms_agreed: document.getElementById("termsAgreement").checked,
+          };
+
+          // Validate required fields
+          if (
+            !formData.username ||
+            !formData.email ||
+            !formData.password ||
+            !formData.full_name
+          ) {
+            alert("Please fill all required fields");
+            return;
+          }
+
+          try {
+            const submitBtn = document.querySelector(
+              "#signupForm button[type='submit']"
+            );
+            submitBtn.disabled = true;
+            submitBtn.innerHTML =
+              '<i class="bi bi-arrow-repeat me-1"></i> Creating Account...';
+
+            // Here you would typically send the data to your server
+            console.log("Form Data:", formData);
+
+            // Simulate API call with timeout
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+
+            // Show success message
+            alert("Account created successfully! You can now log in.");
+
+            // Reset form
+            this.reset();
+            document.getElementById("profileImagePreview").src =
+              "https://via.placeholder.com/100";
+
+            // Redirect to login page
+            window.location.href = "login.html";
+          } catch (error) {
+            console.error("Signup error:", error);
+            alert("Failed to create account. Please try again.");
+          } finally {
+            const submitBtn = document.querySelector(
+              "#signupForm button[type='submit']"
+            );
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML =
+                '<i class="bi bi-person-check-fill me-1"></i> Create Account';
+            }
+          }
+        });
+    </script>
+  </body>
+</html>
