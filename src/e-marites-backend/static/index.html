@@ -393,9 +393,54 @@
             </div>
 
             <!-- Profile icon -->
-            <a href="#" class="icon">
-              <i class="bi bi-person-fill"></i>
-            </a>
+            <div class="dropdown">
+              <a
+                href="#"
+                class="icon"
+                id="profileDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="bi bi-person-fill"></i>
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="profileDropdown"
+              >
+                <li class="dropdown-item-text px-3 py-2">
+                  <div class="fw-bold">User Profile</div>
+                  <div class="text-muted small">
+                    Logged in as: <span id="profile-username">Username</span>
+                  </div>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="#">
+                    <i class="bi bi-person me-2"></i>My Profile
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">
+                    <i class="bi bi-gear me-2"></i>Settings
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">
+                    <i class="bi bi-shield-lock me-2"></i>Change Password
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a
+                    class="dropdown-item text-danger"
+                    href="/logout"
+                    id="logout-btn"
+                  >
+                    <i class="bi bi-box-arrow-right me-2"></i>Log Out
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

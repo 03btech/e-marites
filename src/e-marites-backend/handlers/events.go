@@ -14,109 +14,107 @@ import (
 )
 
 func SubmitEventReport(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-    w.Header().Set("Content-Type", "application/json")
-    if r.Header.Get("Content-Type") != "application/json" {
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(map[string]string{
-            "error": "Content-Type must be application/json",
-        })
-        return
-    }
-     var event models.Event
-    if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(map[string]string{
-            "error": "Invalid JSON format: " + err.Error(),
-        })
-        return
-    }
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") != "application/json" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Content-Type must be application/json",
+		})
+		return
+	}
+	var event models.Event
+	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON format: " + err.Error(),
+		})
+		return
+	}
 
-    if event.EventType == "" || event.Description == "" {
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(map[string]string{
-            "error": "Missing required fields (event_type, description)",
-        })
-        return
-    }
-    
+	if event.EventType == "" || event.Description == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Missing required fields (event_type, description)",
+		})
+		return
+	}
 
-    // 1. First verify the community member exists
-    var memberID int
-    err := db.QueryRow(`
+	// 1. First verify the community member exists
+	var memberID int
+	err := db.QueryRow(`
             SELECT member_id FROM community_members 
             WHERE full_name = $1 AND phone = $2`,
-        event.CommunityMember.FullName,
-        event.CommunityMember.Phone,
-    ).Scan(&memberID)
+		event.CommunityMember.FullName,
+		event.CommunityMember.Phone,
+	).Scan(&memberID)
 
-    if err != nil {
-        if err == sql.ErrNoRows {
-            http.Error(w, "Community member not registered", http.StatusNotFound)
-            return
-        }
-        http.Error(w, "Database error while verifying member", http.StatusInternalServerError)
-        return
-    }
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Community member not registered", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Database error while verifying member", http.StatusInternalServerError)
+		return
+	}
 
-    // 2. Prepare the event data
-    event.ReferenceID = "EM-" + uuid.New().String()[:6]
-    event.CreatedAt = time.Now()
-    event.Status = "reported"
+	// 2. Prepare the event data
+	event.ReferenceID = "EM-" + uuid.New().String()[:6]
+	event.CreatedAt = time.Now()
+	event.Status = "reported"
 
-    // 3. Handle coordinates
-     var latVal, lngVal sql.NullFloat64
-    if event.Coordinates != "" {
-        parts := strings.Split(event.Coordinates, ",")
-        if len(parts) == 2 {
-            latStr := strings.TrimSpace(parts[0])
-            lngStr := strings.TrimSpace(parts[1])
-            // Try parsing, keep Valid=false if parsing fails
-            if pLat, err := strconv.ParseFloat(latStr, 64); err == nil {
-                 latVal = sql.NullFloat64{Float64: pLat, Valid: true}
-            }
-             if pLng, err := strconv.ParseFloat(lngStr, 64); err == nil {
-                 lngVal = sql.NullFloat64{Float64: pLng, Valid: true}
-            }
-        }
-    }
+	// 3. Handle coordinates
+	var latVal, lngVal sql.NullFloat64
+	if event.Coordinates != "" {
+		parts := strings.Split(event.Coordinates, ",")
+		if len(parts) == 2 {
+			latStr := strings.TrimSpace(parts[0])
+			lngStr := strings.TrimSpace(parts[1])
+			// Try parsing, keep Valid=false if parsing fails
+			if pLat, err := strconv.ParseFloat(latStr, 64); err == nil {
+				latVal = sql.NullFloat64{Float64: pLat, Valid: true}
+			}
+			if pLng, err := strconv.ParseFloat(lngStr, 64); err == nil {
+				lngVal = sql.NullFloat64{Float64: pLng, Valid: true}
+			}
+		}
+	}
 
-    // 4. Insert the event
-    baseQuery  := `INSERT INTO community_reported_events (
+	// 4. Insert the event
+	baseQuery := `INSERT INTO community_reported_events (
         reference_id, event_type, severity, description, location_description, 
         coordinates, reporter_id, member_id, status, created_at
     ) VALUES ($1, $2, $3, $4, $5, `
 
-   baseArgs := []interface{}{
-        event.ReferenceID,
-        event.EventType,
-        event.Severity,
-        event.Description,
-        event.LocationDescription,
-        
-   }
+	baseArgs := []interface{}{
+		event.ReferenceID,
+		event.EventType,
+		event.Severity,
+		event.Description,
+		event.LocationDescription,
+	}
 
-   var finalQuery string
-    var finalArgs []interface{}
+	var finalQuery string
+	var finalArgs []interface{}
 
-      if latVal.Valid && lngVal.Valid {
-        // Both lat and lng are valid, use ST_SetSRID function in query
-        finalQuery = baseQuery + `ST_SetSRID(ST_MakePoint($6, $7), 4326), $8, $9, $10, $11)`
-        finalArgs = append(baseArgs, lngVal.Float64, latVal.Float64, event.ReporterID, memberID, event.Status, event.CreatedAt) // Note lng is first in ST_MakePoint
-    } else {
-        // Coordinates are invalid or missing, insert NULL
-        finalQuery = baseQuery + `$6, $7, $8, $9, $10)` // Placeholder 6 is for NULL coordinates
-        finalArgs = append(baseArgs, nil, event.ReporterID, memberID, event.Status, event.CreatedAt)
-    }
+	if latVal.Valid && lngVal.Valid {
+		// Both lat and lng are valid, use ST_SetSRID function in query
+		finalQuery = baseQuery + `ST_SetSRID(ST_MakePoint($6, $7), 4326), $8, $9, $10, $11)`
+		finalArgs = append(baseArgs, lngVal.Float64, latVal.Float64, event.ReporterID, memberID, event.Status, event.CreatedAt) // Note lng is first in ST_MakePoint
+	} else {
+		// Coordinates are invalid or missing, insert NULL
+		finalQuery = baseQuery + `$6, $7, $8, $9, $10)` // Placeholder 6 is for NULL coordinates
+		finalArgs = append(baseArgs, nil, event.ReporterID, memberID, event.Status, event.CreatedAt)
+	}
 
-    _, err = db.Exec(finalQuery, finalArgs...)
+	_, err = db.Exec(finalQuery, finalArgs...)
 
-    if err != nil {
-        fmt.Printf("Database insertion error: %v\n", err)
-        http.Error(w, "Failed to save event", http.StatusInternalServerError)
-        return
-    }
+	if err != nil {
+		fmt.Printf("Database insertion error: %v\n", err)
+		http.Error(w, "Failed to save event", http.StatusInternalServerError)
+		return
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(event)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(event)
 }

@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize map with coordinates for Negros Occidental
   const map = L.map("map-container", {
-    center: [10.6407, 122.9687],
-    zoom: 13,
+    center: [10.716699000872625, 123.51552988317307],
+    zoom: 15.5,
     fullscreenControl: true,
   });
 

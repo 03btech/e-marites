@@ -262,18 +262,6 @@
           </div>
 
           <!-- Terms and Conditions -->
-          <div class="mb-4 form-check">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="termsAgreement"
-              required
-            />
-            <label class="form-check-label" for="termsAgreement"
-              >I agree to the <a href="#">Terms of Service</a> and
-              <a href="#">Privacy Policy</a></label
-            >
-          </div>
 
           <!-- Submission Section -->
           <div class="d-grid gap-2">
@@ -383,6 +371,7 @@
         });
 
       // Form submission handler
+      // Replace the form submission handler in signup.html with this:
       document
         .getElementById("signupForm")
         .addEventListener("submit", async function (e) {
@@ -419,7 +408,6 @@
             phone: document.getElementById("phone").value,
             role: document.getElementById("role").value,
             profile_image: document.getElementById("profileImagePreview").src,
-            terms_agreed: document.getElementById("termsAgreement").checked,
           };
 
           // Validate required fields
@@ -441,11 +429,19 @@
             submitBtn.innerHTML =
               '<i class="bi bi-arrow-repeat me-1"></i> Creating Account...';
 
-            // Here you would typically send the data to your server
-            console.log("Form Data:", formData);
+            const response = await fetch("/api/signup", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
 
-            // Simulate API call with timeout
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || "Failed to create account");
+            }
 
             // Show success message
             alert("Account created successfully! You can now log in.");
@@ -453,13 +449,15 @@
             // Reset form
             this.reset();
             document.getElementById("profileImagePreview").src =
-              "https://via.placeholder.com/100";
+              "assets/images/default_avatar.svg";
 
             // Redirect to login page
             window.location.href = "login.html";
           } catch (error) {
             console.error("Signup error:", error);
-            alert("Failed to create account. Please try again.");
+            alert(
+              error.message || "Failed to create account. Please try again."
+            );
           } finally {
             const submitBtn = document.querySelector(
               "#signupForm button[type='submit']"

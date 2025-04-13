@@ -17,3 +17,5 @@ type Event struct {
     CreatedAt time.Time `json:"created_at,omitempty"`
     Status    string    `json:"status,omitempty"`
 }
+
+
