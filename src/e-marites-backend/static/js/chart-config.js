@@ -1,5 +1,3 @@
-import Chart from "chart.js/auto";
-
 // Historical Accident Trend Chart
 
 async function createAccidentChart() {
@@ -16,27 +14,22 @@ async function createAccidentChart() {
       throw new Error("Failed to get 2D context from canvas.");
     }
 
+    console.log("Fetching accident trend data...");
+    const response = await fetch("/api/accident-trend-data");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const chartData = await response.json();
+    console.log("Accident data received:", chartData);
+
     new Chart(ctx, {
       type: "line",
       data: {
-        labels: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ],
+        labels: chartData.labels,
         datasets: [
           {
-            label: "Accident Count",
-            data: [12, 19, 15, 8, 10, 12, 15, 18, 22, 25, 20, 17],
+            label: "Incident Count",
+            data: chartData.data,
             backgroundColor: "rgba(40, 52, 68, 0.2)",
             borderColor: "rgba(40, 52, 68, 1)",
             borderWidth: 2,
@@ -60,21 +53,25 @@ async function createAccidentChart() {
         scales: {
           y: {
             beginAtZero: true,
+            ticks: {},
+          },
+
+          x: {
             ticks: {
-              stepSize: 5,
+              autoSkip: true,
+              maxRotation: 0,
             },
           },
         },
       },
     });
 
-    console.log("Accident chart rendered successfully.");
+    console.log("Accident chart rendered successfully with dynamic data.");
   } catch (error) {
     console.error("Error creating accident chart:", error.message);
   }
 }
 
-// Auto-run on page load
 document.addEventListener("DOMContentLoaded", () => {
   createAccidentChart();
 });

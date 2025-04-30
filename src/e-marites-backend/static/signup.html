@@ -5,15 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Create Account - Rural Community Mishaps System</title>
-    <!-- Bootstrap 5.3.5 CSS -->
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
       rel="stylesheet"
+      href="js/bootstrap-5.3.5-dist/css/bootstrap.min.css"
     />
-    <!-- Bootstrap Icons -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      href="js/bootstrap-icons-1.11.3/font/bootstrap-icons.css"
     />
     <style>
       body {
@@ -60,9 +58,9 @@
         padding: 12px 20px;
         border-radius: 10px;
         display: flex;
-        flex-wrap: wrap; /* Allows items to wrap */
-        gap: 15px; /* Space between items */
-        justify-content: center; /* Center items when they wrap */
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
         align-items: center;
         font-size: 0.95rem;
         margin-bottom: 2rem;
@@ -72,7 +70,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        white-space: nowrap; /* Prevent text from breaking */
+        white-space: nowrap;
       }
       .info-icon {
         font-size: 1.1rem;
@@ -105,7 +103,6 @@
   </head>
   <body>
     <div class="container">
-      <!-- Info Bar -->
       <div class="info-bar">
         <div class="info-item">
           <i class="bi bi-calendar info-icon"></i>
@@ -121,7 +118,6 @@
         </div>
       </div>
 
-      <!-- Signup Card -->
       <div class="signup-container">
         <div class="signup-header">
           <h2 class="signup-title">
@@ -133,34 +129,6 @@
         </div>
 
         <form id="signupForm">
-          <!-- Profile Image -->
-          <div class="mb-3 text-center">
-            <img
-              src="assets/images/default_avatar.svg"
-              alt="Profile preview"
-              class="profile-image-preview"
-              id="profileImagePreview"
-            />
-            <div class="d-flex justify-content-center">
-              <input
-                type="file"
-                class="form-control d-none"
-                id="profileImage"
-                accept="image/*"
-                title="Upload your profile image"
-                placeholder="Choose a file"
-              />
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary"
-                onclick="document.getElementById('profileImage').click()"
-              >
-                <i class="bi bi-camera-fill me-1"></i>Upload Photo
-              </button>
-            </div>
-          </div>
-
-          <!-- Account Information -->
           <div class="form-section">
             <h5><i class="bi bi-person-circle me-2"></i>Account Information</h5>
             <div class="mb-3">
@@ -224,7 +192,6 @@
             </div>
           </div>
 
-          <!-- Personal Information -->
           <div class="form-section">
             <h5><i class="bi bi-card-text me-2"></i>Personal Information</h5>
             <div class="mb-3">
@@ -261,9 +228,6 @@
             </div>
           </div>
 
-          <!-- Terms and Conditions -->
-
-          <!-- Submission Section -->
           <div class="d-grid gap-2">
             <button type="submit" class="btn btn-signup">
               <i class="bi bi-person-check-fill me-1"></i> Create Account
@@ -277,32 +241,25 @@
       </div>
     </div>
 
-    <!-- Bootstrap 5.3.5 JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="js/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // Update current date and time
       function updateDateTime() {
         const now = new Date();
 
-        // Format date (e.g., APRIL 04, 2025)
         const options = { month: "long", day: "2-digit", year: "numeric" };
         document.getElementById("current-date").textContent = now
           .toLocaleDateString("en-US", options)
           .toUpperCase();
 
-        // Format time (e.g., 14:30)
         document.getElementById("current-time").textContent = `TIME: ${now
           .getHours()
           .toString()
           .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
       }
 
-      // Update immediately and then every minute
       updateDateTime();
       setInterval(updateDateTime, 60000);
 
-      // Password strength indicator
       document
         .getElementById("password")
         .addEventListener("input", function (e) {
@@ -310,29 +267,26 @@
           const strengthBar = document.getElementById("passwordStrengthBar");
           let strength = 0;
 
-          // Length check
           if (password.length > 7) strength += 1;
           if (password.length > 11) strength += 1;
 
-          // Character type checks
           if (/[A-Z]/.test(password)) strength += 1;
           if (/[a-z]/.test(password)) strength += 1;
           if (/[0-9]/.test(password)) strength += 1;
           if (/[^A-Za-z0-9]/.test(password)) strength += 1;
 
-          // Update strength bar
           let width = 0;
-          let color = "#dc3545"; // Red
+          let color = "#dc3545";
 
           if (strength >= 6) {
             width = 100;
-            color = "#28a745"; // Green
+            color = "#28a745";
           } else if (strength >= 4) {
             width = 75;
-            color = "#ffc107"; // Yellow
+            color = "#ffc107";
           } else if (strength >= 2) {
             width = 50;
-            color = "#fd7e14"; // Orange
+            color = "#fd7e14";
           } else if (password.length > 0) {
             width = 25;
           }
@@ -341,7 +295,6 @@
           strengthBar.style.backgroundColor = color;
         });
 
-      // Password confirmation validation
       document
         .getElementById("confirmPassword")
         .addEventListener("input", function (e) {
@@ -355,29 +308,11 @@
           }
         });
 
-      // Profile image preview
-      document
-        .getElementById("profileImage")
-        .addEventListener("change", function (e) {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-              document.getElementById("profileImagePreview").src =
-                event.target.result;
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-
-      // Form submission handler
-      // Replace the form submission handler in signup.html with this:
       document
         .getElementById("signupForm")
         .addEventListener("submit", async function (e) {
           e.preventDefault();
 
-          // Validate password match
           const password = document.getElementById("password").value;
           const confirmPassword =
             document.getElementById("confirmPassword").value;
@@ -387,7 +322,6 @@
             return;
           }
 
-          // Validate password strength
           if (
             password.length < 8 ||
             !/[A-Z]/.test(password) ||
@@ -399,7 +333,6 @@
             return;
           }
 
-          // Prepare form data
           const formData = {
             username: document.getElementById("username").value,
             email: document.getElementById("email").value,
@@ -407,10 +340,8 @@
             full_name: document.getElementById("fullName").value,
             phone: document.getElementById("phone").value,
             role: document.getElementById("role").value,
-            profile_image: document.getElementById("profileImagePreview").src,
           };
 
-          // Validate required fields
           if (
             !formData.username ||
             !formData.email ||
@@ -443,15 +374,10 @@
               throw new Error(data.error || "Failed to create account");
             }
 
-            // Show success message
             alert("Account created successfully! You can now log in.");
 
-            // Reset form
             this.reset();
-            document.getElementById("profileImagePreview").src =
-              "assets/images/default_avatar.svg";
 
-            // Redirect to login page
             window.location.href = "login.html";
           } catch (error) {
             console.error("Signup error:", error);

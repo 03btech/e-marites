@@ -1,14 +1,11 @@
--- Main database for the e-MARITES system
-CREATE DATABASE e_marites;
-
--- Connect to the database
-\c e_marites
+-- Main database schema for the e-MARITES system
 
 -- Enum types for consistent values
-CREATE TYPE event_severity AS ENUM ('low', 'medium', 'high');
+CREATE TYPE event_severity AS ENUM ('Low', 'Medium', 'High');
 CREATE TYPE event_status AS ENUM ('reported', 'verified', 'in_progress', 'resolved', 'false_alarm');
 CREATE TYPE notification_status AS ENUM ('unread', 'read');
 CREATE TYPE user_role AS ENUM ('admin', 'operator', 'responder', 'community_member', 'reporter');
+
 -- Users table for authentication and authorization
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
@@ -31,7 +28,7 @@ CREATE TABLE community_members (
     phone VARCHAR(20) NOT NULL,
     address TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT unique_member UNIQUE (full_name, phone)  -- Ensures name+phone combination is unique
+    CONSTRAINT unique_member UNIQUE (full_name, phone)
 );
 
 -- Community-reported events (main table)
@@ -42,7 +39,7 @@ CREATE TABLE community_reported_events (
     severity event_severity NOT NULL,
     description TEXT NOT NULL,
     location_description TEXT NOT NULL,
-    coordinates GEOMETRY(POINT, 4326),  -- For map integration (latitude/longitude)
+    coordinates GEOGRAPHY(POINT, 4326),
     reporter_id INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
     member_id INTEGER NOT NULL REFERENCES community_members(member_id) ON DELETE RESTRICT,
     status event_status DEFAULT 'reported',
@@ -50,7 +47,7 @@ CREATE TABLE community_reported_events (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP WITH TIME ZONE,
     resolution_notes TEXT,
-    images TEXT[]  -- Array to store image URLs
+    images TEXT[]
 );
 
 -- Emergency alerts (processed from community reports)
@@ -62,7 +59,7 @@ CREATE TABLE emergency_alerts (
     severity event_severity NOT NULL,
     description TEXT NOT NULL,
     location_description TEXT NOT NULL,
-    coordinates GEOMETRY(POINT, 4326),
+    coordinates GEOGRAPHY(POINT, 4326),
     assigned_team VARCHAR(100),
     status event_status NOT NULL DEFAULT 'reported',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -159,4 +156,3 @@ CREATE INDEX idx_notifications_user_status ON notifications(user_id, status);
 CREATE INDEX idx_response_actions_alert ON response_actions(alert_id);
 CREATE INDEX idx_historical_incidents_occurred_at ON historical_incidents(occurred_at);
 CREATE INDEX idx_risk_zones_risk_level ON risk_zones(risk_level);
-

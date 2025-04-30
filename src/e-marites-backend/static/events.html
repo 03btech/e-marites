@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Community Events Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="js/bootstrap-5.3.5-dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="js/bootstrap-icons-1.11.3/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .events-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .portal-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+      }
+      .portal-title {
+        color: #283444;
+        font-weight: 600;
+      }
+      .info-bar {
+        background-color: #283444;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+      }
+      .bi-arrow-left-circle {
+        color: #6c757d;
+        transition: color 0.2s;
+      }
+
+      .bi-arrow-left-circle:hover {
+        color: #283444;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .info-icon {
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 992px) {
+        .info-bar {
+          flex-direction: column;
+          gap: 10px;
+          align-items: flex-start;
+        }
+
+        .info-item {
+          width: 100%;
+          justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .info-bar {
+          padding: 10px 15px;
+          font-size: 0.85rem;
+        }
+
+        .info-icon {
+          font-size: 1rem;
+        }
+      }
+      .event-card {
+        margin-bottom: 1.5rem;
+        border-left: 4px solid;
+        transition: transform 0.2s;
+      }
+      .event-card:hover {
+        transform: translateY(-3px);
+      }
+      .event-card.High {
+        border-left-color: #dc3545;
+      }
+      .event-card.Medium {
+        border-left-color: #fd7e14;
+      }
+      .event-card.Low {
+        border-left-color: #28a745;
+      }
+      .severity-badge {
+        font-weight: 500;
+      }
+      .status-badge {
+        font-weight: 500;
+      }
+      #map-container {
+        height: 400px;
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+      .leaflet-control-fullscreen a {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23333'%3E%3Cpath d='M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z'/%3E%3C/svg%3E");
+        background-size: 16px 16px;
+        background-repeat: no-repeat;
+        background-position: center center;
+        width: 30px;
+        height: 30px;
+      }
+      .leaflet-control-fullscreen {
+        line-height: 30px;
+        text-align: center;
+      }
+      .action-buttons .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+      .filter-section {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+      }
+      #edit-event-map-container {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+      }
+
+      .modal-lg {
+        max-width: 800px;
+      }
+
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+      .filter-section {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .filter-section label {
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+      }
+
+      #apply-filters,
+      #reset-filters {
+        height: 38px;
+      }
+      #map-instructions {
+        display: inline-block;
+        padding: 4px 8px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border-left: 3px solid #0d6efd;
+      }
+
+      #edit-event-map-container {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: height 0.3s ease;
+      }
+
+      .modal-dialog {
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-body {
+        overflow-y: visible;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="info-bar mb-3">
+        <div class="info-item">
+          <i class="bi bi-calendar info-icon"></i>
+          <span id="current-date">Loading date...</span>
+        </div>
+        <div class="info-item">
+          <i class="bi bi-geo-alt-fill info-icon"></i>
+          <span>BARANGAY POBLACION, CAUAYAN NEGROS OCCIDENTAL</span>
+        </div>
+        <div class="info-item">
+          <i class="bi bi-clock-fill info-icon"></i>
+          <span id="current-time">Loading time...</span>
+        </div>
+      </div>
+
+      <div class="events-container">
+        <div class="portal-header">
+          <h2 class="portal-title">
+            <i class="bi bi-list-task me-2"></i>Community Events Dashboard
+          </h2>
+          <p class="text-muted">View and manage reported community events</p>
+        </div>
+        <div class="mb-3">
+          <a href="index.html" class="text-decoration-none" title="Go back">
+            <i class="bi bi-arrow-left-circle fs-5"></i> Go to Main Dashboard
+          </a>
+        </div>
+        <div class="filter-section">
+          <div class="row g-3">
+            <div class="col-md-2">
+              <label for="filter-status" class="form-label">Status</label>
+              <select class="form-select" id="filter-status">
+                <option value="">All Statuses</option>
+                <option value="reported">Reported</option>
+                <option value="verified">Verified</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="false_alarm">False Alarm</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label for="filter-severity" class="form-label">Severity</label>
+              <select class="form-select" id="filter-severity">
+                <option value="">All Severities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label for="filter-type" class="form-label">Event Type</label>
+              <select class="form-select" id="filter-type">
+                <option value="">All Types</option>
+                <option value="Accident">Vehicular Accident</option>
+                <option value="Flooding">Flooding</option>
+                <option value="Landslide">Landslide</option>
+                <option value="Fire">Fire</option>
+                <option value="Power Outage">Power Outage</option>
+                <option value="Road Hazard">Road Hazard</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label for="filter-date-from" class="form-label">From Date</label>
+              <input type="date" class="form-control" id="filter-date-from" />
+            </div>
+            <div class="col-md-2">
+              <label for="filter-date-to" class="form-label">To Date</label>
+              <input type="date" class="form-control" id="filter-date-to" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button id="apply-filters" class="btn btn-primary w-100">
+                <i class="bi bi-funnel me-1"></i> Filter
+              </button>
+              <button id="reset-filters" class="btn btn-outline-secondary ms-2">
+                <i class=""></i> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-7">
+            <div id="events-list"></div>
+          </div>
+          <div class="col-md-5">
+            <div id="map-container"></div>
+            <div id="event-details" class="d-none">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title">Event Details</h5>
+                </div>
+                <div class="card-body">
+                  <p><strong>Type:</strong> <span id="detail-type"></span></p>
+                  <p>
+                    <strong>Severity:</strong>
+                    <span id="detail-severity"></span>
+                  </p>
+                  <p>
+                    <strong>Status:</strong> <span id="detail-status"></span>
+                  </p>
+                  <p>
+                    <strong>Location:</strong>
+                    <span id="detail-location"></span>
+                  </p>
+                  <p>
+                    <strong>Description:</strong>
+                    <span id="detail-description"></span>
+                  </p>
+                  <p>
+                    <strong>Reported At:</strong>
+                    <span id="detail-created"></span>
+                  </p>
+                  <div id="resolution-section" class="d-none mt-3">
+                    <label for="resolution-notes" class="form-label"
+                      >Resolution Notes</label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="resolution-notes"
+                      rows="3"
+                    ></textarea>
+                    <div class="d-flex justify-content-end mt-2">
+                      <button id="save-resolution" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Save Resolution
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="editEventModal"
+      tabindex="-1"
+      aria-labelledby="editEventModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="editEventModalLabel">Edit Event</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editEventForm">
+              <input type="hidden" id="edit-event-id" />
+              <div class="mb-3">
+                <label for="edit-event-type" class="form-label"
+                  >Event Type</label
+                >
+                <select class="form-select" id="edit-event-type" required>
+                  <option value="">Select event type</option>
+                  <option value="Accident">Vehicular Accident</option>
+                  <option value="Flooding">Flooding</option>
+                  <option value="Landslide">Landslide</option>
+                  <option value="Fire">Fire</option>
+                  <option value="Power Outage">Power Outage</option>
+                  <option value="Road Hazard">Road Hazard</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit-event-severity" class="form-label"
+                  >Severity Level</label
+                >
+                <select class="form-select" id="edit-event-severity" required>
+                  <option value="High">High - Immediate danger</option>
+                  <option value="Medium">Medium - Concerning situation</option>
+                  <option value="Low">Low - General information</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit-event-status" class="form-label">Status</label>
+                <select class="form-select" id="edit-event-status" required>
+                  <option value="reported">Reported</option>
+                  <option value="verified">Verified</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="false_alarm">False Alarm</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit-event-location" class="form-label"
+                  >Location Description</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="edit-event-location"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="edit-event-description" class="form-label"
+                  >Description</label
+                >
+                <textarea
+                  class="form-control"
+                  id="edit-event-description"
+                  rows="4"
+                  required
+                ></textarea>
+              </div>
+              <div class="mb-3" id="edit-event-coordinates-container">
+                <label class="form-label">Coordinates</label>
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit-event-latitude"
+                    placeholder="Latitude"
+                    readonly
+                  />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit-event-longitude"
+                    placeholder="Longitude"
+                    readonly
+                  />
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    id="edit-event-update-location"
+                  >
+                    <i class="bi bi-map"></i> Update Location
+                  </button>
+                </div>
+                <small class="text-muted">
+                  <span id="map-instructions" style="display: none">
+                    <i class="bi bi-info-circle"></i> Drag the marker to update
+                    location, then click "Save Changes"
+                  </span>
+                </small>
+              </div>
+              <div
+                id="edit-event-map-container"
+                style="height: 250px; display: none"
+                class="mb-3"
+              ></div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="save-event-changes"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function updateDateTime() {
+        const now = new Date();
+
+        const options = { month: "long", day: "2-digit", year: "numeric" };
+        document.getElementById("current-date").textContent = now
+          .toLocaleDateString("en-US", options)
+          .toUpperCase();
+
+        document.getElementById("current-time").textContent = `TIME: ${now
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+      }
+
+      updateDateTime();
+      setInterval(updateDateTime, 60000);
+    </script>
+
+    <script src="js/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/leaflet/leaflet.js"></script>
+    <script src="events.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>

@@ -9,15 +9,13 @@
     <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
     <link rel="stylesheet" href="./js/leaflet/Control.FullScreen.css" />
 
-    <!-- Bootstrap 5.3.5 CSS -->
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
       rel="stylesheet"
+      href="js/bootstrap-5.3.5-dist/css/bootstrap.min.css"
     />
-    <!-- Bootstrap Icons -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      href="js/bootstrap-icons-1.11.3/font/bootstrap-icons.css"
     />
     <style>
       body {
@@ -26,7 +24,7 @@
       .reporting-portal {
         max-width: 800px;
         margin: 2rem auto;
-        padding: 2rem;
+        padding: 0.5rem;
         background: white;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -40,6 +38,14 @@
       .portal-title {
         color: #283444;
         font-weight: 600;
+      }
+      .bi-arrow-left-circle {
+        color: #6c757d;
+        transition: color 0.2s;
+      }
+
+      .bi-arrow-left-circle:hover {
+        color: #283444;
       }
       .form-section {
         margin-bottom: 1.5rem;
@@ -70,15 +76,40 @@
         justify-content: space-between;
         align-items: center;
         font-size: 0.95rem;
-        margin-bottom: 2rem;
       }
+
       .info-item {
         display: flex;
         align-items: center;
         gap: 8px;
       }
+
       .info-icon {
         font-size: 1.1rem;
+      }
+
+      @media (max-width: 992px) {
+        .info-bar {
+          flex-direction: column;
+          gap: 10px;
+          align-items: flex-start;
+        }
+
+        .info-item {
+          width: 100%;
+          justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .info-bar {
+          padding: 10px 15px;
+          font-size: 0.85rem;
+        }
+
+        .info-icon {
+          font-size: 1rem;
+        }
       }
       #e-MARITES {
         font-size: 35px;
@@ -89,15 +120,13 @@
         width: 100%;
         border-radius: 8px;
       }
-      .leaflet-control-fullscreen a {
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>');
-        background-size: 16px 16px;
+      .leaflet-control-fullscreen {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>');
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- Info Bar -->
       <div class="info-bar">
         <div class="info-item">
           <i class="bi bi-calendar info-icon"></i>
@@ -113,7 +142,6 @@
         </div>
       </div>
 
-      <!-- Reporting Portal Card -->
       <div class="reporting-portal">
         <div class="portal-header">
           <h2 class="portal-title">
@@ -125,21 +153,25 @@
             Report any incidents, hazards, or community events
           </p>
         </div>
-
+        <div class="mb-3">
+          <a href="index.html" class="text-decoration-none" title="Go back">
+            <i class="bi bi-arrow-left-circle fs-5"></i> Go back to Main
+            Dashboard
+          </a>
+        </div>
         <form id="eventReportForm">
-          <!-- Event Details Section -->
           <div class="form-section">
             <h5><i class="bi bi-info-circle me-2"></i>Event Details</h5>
             <div class="mb-3">
               <label for="eventType" class="form-label">Event Type</label>
               <select class="form-select" id="eventType" required>
                 <option value="" selected disabled>Select event type</option>
-                <option value="Accident">Vehicular Accident</option>
+                <option value="Vehicular_Accident">Vehicular Accident</option>
                 <option value="Flooding">Flooding</option>
                 <option value="Landslide">Landslide</option>
                 <option value="Fire">Fire</option>
-                <option value="Power Outage">Power Outage</option>
-                <option value="Road Hazard">Road Hazard</option>
+                <option value="Power_Outage">Power Outage</option>
+                <option value="Road_Hazard">Road Hazard</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -171,7 +203,6 @@
             </div>
           </div>
 
-          <!-- Location Details Section -->
           <div class="form-section">
             <h5><i class="bi bi-geo-alt me-2"></i>Location Details</h5>
             <div class="mb-3">
@@ -212,7 +243,6 @@
             </div>
           </div>
 
-          <!-- Reporter Information Section -->
           <div class="form-section">
             <h5>
               <i class="bi bi-person-circle me-2"></i>Community Member
@@ -244,7 +274,6 @@
             </div>
           </div>
 
-          <!-- Submission Section -->
           <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
             <button type="reset" class="btn btn-outline-secondary me-md-2">
               <i class="bi bi-x-circle me-1"></i> Clear Form
@@ -256,7 +285,6 @@
         </form>
       </div>
 
-      <!-- Success Modal (hidden by default) -->
       <div
         class="modal fade"
         id="successModal"
@@ -300,32 +328,26 @@
       </div>
     </div>
 
-    <!-- Bootstrap 5.3.5 JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="js/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/leaflet/leaflet.js"></script>
     <script>
-      // Update current date and time
       function updateDateTime() {
         const now = new Date();
 
-        // Format date (e.g., APRIL 04, 2025)
         const options = { month: "long", day: "2-digit", year: "numeric" };
         document.getElementById("current-date").textContent = now
           .toLocaleDateString("en-US", options)
           .toUpperCase();
 
-        // Format time (e.g., 14:30)
         document.getElementById("current-time").textContent = `TIME: ${now
           .getHours()
           .toString()
           .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
       }
 
-      // Update immediately and then every minute
       updateDateTime();
       setInterval(updateDateTime, 60000);
 
-      // Form submission handler
       document
         .getElementById("eventReportForm")
         .addEventListener("submit", async function (e) {
@@ -347,15 +369,13 @@
             return;
           }
 
-          // Prepare form dfullNameata
-          // Prepare form data
           const formData = {
             event_type: document.getElementById("eventType").value,
             severity: document.getElementById("eventSeverity").value,
             description: document.getElementById("eventDescription").value,
             location: document.getElementById("eventLocation").value,
             coordinates: coordinatesValue,
-            reporter_id: 1, // Ensure this is a number
+            reporter_id: 1,
             community_member: {
               full_name: document.getElementById("communityMemberFullName")
                 .value,
@@ -363,7 +383,6 @@
             },
           };
 
-          // Validate required fields
           if (
             !formData.event_type ||
             !formData.description ||
@@ -437,25 +456,23 @@
     </script>
 
     <script src="./js/leaflet/leaflet.js"></script>
-    <!-- Add this before your other scripts -->
+    <script src="index.js"></script>
+
     <script src="./js/leaflet/Control.FullScreen.js"></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Initialize map
         const map = L.map("map-container", {
           center: [10.716699000872625, 123.51552988317307],
           zoom: 15.5,
           fullscreenControl: true,
         });
 
-        // Add tile layer (simplified - removed try/catch as it wouldn't catch tile loading errors)
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "© OpenStreetMap contributors",
           maxZoom: 18,
         }).addTo(map);
 
-        // Initialize Fullscreen control (CORRECTED)
         L.control
           .fullscreen({
             position: "topright",
@@ -465,78 +482,64 @@
           })
           .addTo(map);
 
-        // Marker variable
         let marker = null;
 
-        // Local geocoding data
         const localGeocodingData = {
-          // GOVERNMENT OFFICES
           "Toboso Municipal Hall": [10.714722, 123.516389],
           "Toboso Police Station (PNP)": [10.71485, 123.5167],
           "Bureau of Fire Protection (BFP) Toboso": [10.7149, 123.5162],
           "Toboso Post Office": [10.71465, 123.51655],
 
-          // HEALTH FACILITIES
           "Toboso Rural Health Unit": [10.7145, 123.517],
           "Toboso Medicare Community Hospital": [10.7152, 123.5158],
           "Toboso Birthing Center": [10.7143, 123.5173],
 
-          // EDUCATIONAL INSTITUTIONS
           "Toboso National High School": [10.713889, 123.518056],
           "Toboso Central Elementary School": [10.7135, 123.5185],
           "Don Julio Montelibano Memorial ES": [10.713, 123.519],
           "Toboso Science High School": [10.7137, 123.5178],
           "Toboso Day Care Center": [10.7141, 123.5171],
 
-          // RELIGIOUS SITES
           "St. Joseph the Worker Parish Church": [10.714167, 123.516],
           "Toboso Evangelical Church": [10.71375, 123.5175],
           "Toboso United Methodist Church": [10.7144, 123.5168],
 
-          // PUBLIC MARKETS & COMMERCE
           "Toboso Public Market": [10.714, 123.5172],
           "Toboso Town Plaza": [10.7143, 123.5163],
           "Toboso Cooperative Store": [10.7146, 123.5164],
 
-          // TRANSPORT HUBS
           "Toboso Bus Terminal": [10.7155, 123.5155],
           "Toboso Tricycle Terminal": [10.7153, 123.5157],
           "Toboso Jeepney Stand": [10.715, 123.516],
 
-          // BARANGAY HALLS
           "Barangay Salamanca Hall": [10.7165, 123.514],
           "Barangay Tabun-ac Hall": [10.7125, 123.519],
           "Barangay Bandila Hall": [10.717, 123.513],
           "Barangay San Isidro Hall": [10.711, 123.52],
 
-          // NATURAL FEATURES
           "Malatan-og River": [10.712, 123.52],
           "Toboso Mangrove Forest": [10.716, 123.51],
           "Mount Mandalagan Trailhead": [10.71, 123.525],
 
-          // RECREATIONAL
           "Toboso Sports Complex": [10.7132, 123.518],
           "Toboso Children's Park": [10.7142, 123.5167],
           "Toboso Basketball Court": [10.7139, 123.517],
 
-          // LANDMARKS
           "Toboso Welcome Arch": [10.7158, 123.515],
           "Veterans Memorial Monument": [10.7144, 123.5165],
           "Toboso Historical Marker": [10.71435, 123.51645],
 
-          // RURAL BARANGAYS
           "Sitio Proper Farm Cooperative": [10.72, 123.512],
           "Purok Magsaysay Meeting Hall": [10.718, 123.514],
           "Toboso Upland Farmers Center": [10.725, 123.51],
         };
 
-        // Marker placement function
         function placeMarker(latlng, address = "") {
           if (marker) map.removeLayer(marker);
 
           marker = L.marker(latlng, {
             draggable: true,
-            icon: new L.Icon.Default(), // Using default icon for simplicity
+            icon: new L.Icon.Default(),
           }).addTo(map);
 
           if (address) {
@@ -557,18 +560,15 @@
           map.panTo(latlng);
         }
 
-        // Map click handler
         map.on("click", function (e) {
           placeMarker(e.latlng);
         });
 
-        // Address search function
         function searchAddress() {
           const query = document.getElementById("address-search").value.trim();
           if (!query) return;
 
           if (navigator.onLine) {
-            // Online geocoding
             fetch(
               `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
                 query
@@ -580,7 +580,7 @@
                   const lat = parseFloat(data[0].lat);
                   const lng = parseFloat(data[0].lon);
                   placeMarker([lat, lng], query);
-                  coordInput.value = `${lat},${lng}`; // Explicitly set coordinates
+                  coordInput.value = `${lat},${lng}`;
                 } else {
                   tryLocalGeocoding(query);
                 }
@@ -591,14 +591,13 @@
           }
         }
 
-        // Local geocoding fallback
         function tryLocalGeocoding(query) {
           const normalizedQuery = query.toLowerCase();
           const coordInput = document.getElementById("coordinates");
           for (const [key, coords] of Object.entries(localGeocodingData)) {
             if (key.toLowerCase().includes(normalizedQuery)) {
               placeMarker(coords, key);
-              coordInput.value = `${coords[0]},${coords[1]}`; // Explicitly set coordinates
+              coordInput.value = `${coords[0]},${coords[1]}`;
               return;
             }
           }
@@ -608,7 +607,6 @@
           );
         }
 
-        // Event listeners
         document
           .getElementById("search-button")
           .addEventListener("click", searchAddress);
@@ -618,7 +616,6 @@
             if (e.key === "Enter") searchAddress();
           });
 
-        // Form validation
         document
           .getElementById("eventReportForm")
           .addEventListener("submit", function (e) {
@@ -628,7 +625,6 @@
             }
           });
 
-        // Fullscreen handling
         map.on("fullscreenchange", function () {
           setTimeout(function () {
             map.invalidateSize();
