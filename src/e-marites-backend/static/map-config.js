@@ -279,7 +279,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function fetchEvents() {
-    fetch("/api/community-events")
+    // Calculate the date 7 days ago
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    // Format as YYYY-MM-DD
+    const fromDateString = oneWeekAgo.toISOString().split("T")[0];
+
+    // Add the from_date query parameter to the API endpoint
+    fetch(`/api/community-events?from_date=${fromDateString}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -287,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then((data) => {
-        console.log("Fetched events:", data);
+        console.log("Fetched events from last week:", data); // Updated log message
         if (!Array.isArray(data)) {
           console.error("Fetched data is not an array:", data);
           return;
@@ -304,10 +311,15 @@ document.addEventListener("DOMContentLoaded", function () {
           const eventId = event.event_id;
           receivedEventIds.add(eventId);
 
-          if (currentMarkers[eventId]) {
-            newMarkers[eventId] = currentMarkers[eventId];
-            delete currentMarkers[eventId];
+          // Check if marker exists and update/add
+          let marker = currentMarkers[eventId];
+          if (marker) {
+            // Optional: Update existing marker popup if needed
+            // marker.setPopupContent(...)
+            newMarkers[eventId] = marker; // Keep existing marker
+            delete currentMarkers[eventId]; // Remove from old list
           } else {
+            // Add new marker if it doesn't exist
             const newMarker = addSingleMarker(event);
             if (newMarker) {
               newMarkers[eventId] = newMarker;
@@ -315,12 +327,15 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
 
+        // Remove markers for events that are no longer in the fetched data (older than a week)
         Object.keys(currentMarkers).forEach((eventId) => {
-          console.log(`Removing marker for event ID ${eventId}`);
+          console.log(
+            `Removing marker for event ID ${eventId} (older than a week or removed)`
+          );
           map.removeLayer(currentMarkers[eventId]);
         });
 
-        currentMarkers = newMarkers;
+        currentMarkers = newMarkers; // Update the global marker list
       })
       .catch((error) => {
         console.error("Error fetching event data:", error);

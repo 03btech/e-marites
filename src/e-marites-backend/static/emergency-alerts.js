@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   fetchCommunityEvents();
   setupReportButton();
-  setupRealTimeChecking();
+  setupStatusBar();
+  setInterval(fetchCommunityEvents, 5000);
 
   const enhancedStyles = document.createElement("style");
   enhancedStyles.textContent = `
@@ -67,18 +68,13 @@ const agencySelection = document.getElementById("agencySelection");
 const agencyErrorDiv = document.getElementById("agencyError");
 let selectedEventIds = [];
 let selectedAgency = null;
-let lastCheckTimestamp = new Date().toISOString();
 let isSubmitting = false;
-const seenEventIds = new Set();
+let previousEventIds = new Set();
 
-function setupRealTimeChecking() {
-  const checkInterval = 5000;
-  setInterval(checkForNewEvents, checkInterval);
-
+function setupStatusBar() {
   const statusBar = document.createElement("div");
   statusBar.className =
     "alert alert-info d-flex align-items-center justify-content-between mb-3 py-2 px-3 rounded-3";
-  statusBar.id = "realtimeStatusBar";
   statusBar.innerHTML = `
     <div class="d-flex align-items-center">
       <div class="spinner-grow spinner-grow-sm text-primary me-2" role="status">
@@ -88,72 +84,47 @@ function setupRealTimeChecking() {
     </div>
     <small class="text-muted">Last checked: Just now</small>
   `;
-
   eventsListContainer.parentNode.insertBefore(statusBar, eventsListContainer);
-
-  checkForNewEvents();
 }
 
-async function checkForNewEvents() {
+async function fetchCommunityEvents() {
+  const statusBar = document.querySelector(".alert-info");
+  const lastCheckedEl = statusBar?.querySelector("small");
+
   try {
-    const statusBar = document.getElementById("realtimeStatusBar");
-    const lastCheckedEl = statusBar?.querySelector("small");
-    const statusTextEl = statusBar?.querySelector("span");
-
-    if (statusTextEl) {
-      statusTextEl.textContent = "Checking for new events...";
-    }
-
-    const response = await fetch(
-      `/api/community-events/since?timestamp=${encodeURIComponent(
-        lastCheckTimestamp
-      )}&status=verified`
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const newEvents = await response.json();
-    lastCheckTimestamp = new Date().toISOString();
-
-    if (newEvents && newEvents.length > 0) {
-      const trulyNewEvents = newEvents.filter(
-        (event) => !seenEventIds.has(event.event_id)
-      );
-
-      if (trulyNewEvents.length > 0) {
-        addNewEventsToUI(trulyNewEvents);
-        showNewEventsNotification(trulyNewEvents.length);
-      }
-    }
-
     if (lastCheckedEl) {
       lastCheckedEl.textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
     }
 
-    if (statusTextEl) {
-      statusTextEl.textContent = "Monitoring for new events";
-    }
-  } catch (error) {
-    console.error("Error checking for new events:", error);
-    const statusBar = document.getElementById("realtimeStatusBar");
+    const response = await fetch("/api/community-events?status=verified");
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const events = await response.json();
 
+    const currentEventIds = new Set(events.map((event) => event.event_id));
+    const newEventIds = [...currentEventIds].filter(
+      (id) => !previousEventIds.has(id)
+    );
+
+    if (newEventIds.length > 0) {
+      showNewEventsNotification(newEventIds.length);
+      previousEventIds = currentEventIds;
+    }
+
+    renderCommunityEvents(events, new Set(newEventIds));
+  } catch (error) {
+    console.error("Error fetching community events:", error);
     if (statusBar) {
       statusBar.innerHTML = `
         <div class="d-flex align-items-center">
           <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-          <span>Error checking for new events</span>
+          <span>Error loading events</span>
         </div>
         <small class="text-muted">Last checked: ${new Date().toLocaleTimeString()}</small>
       `;
     }
+    eventsListContainer.innerHTML =
+      '<div class="alert alert-danger">Failed to load community events. Please try again later.</div>';
   }
-}
-
-function addNewEventsToUI(newEvents) {
-  const newEventIds = newEvents.map((event) => event.event_id);
-  fetchCommunityEvents(new Set(newEventIds));
 }
 
 function showNewEventsNotification(count) {
@@ -210,36 +181,6 @@ function showNewEventsNotification(count) {
   }, 5000);
 }
 
-async function fetchCommunityEvents(newlyAddedEventIds = new Set()) {
-  reportStatusDiv.style.display = "none";
-  if (newlyAddedEventIds.size === 0) {
-    eventsListContainer.innerHTML =
-      '<div class="text-center p-3 loading-pulse">Loading community events...</div>';
-  }
-
-  try {
-    const response = await fetch("/api/community-events?status=verified");
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const events = await response.json();
-
-    seenEventIds.clear();
-    events.forEach((event) => {
-      seenEventIds.add(event.event_id);
-    });
-
-    renderCommunityEvents(events, newlyAddedEventIds);
-  } catch (error) {
-    console.error("Error fetching community events:", error);
-    eventsListContainer.innerHTML =
-      '<div class="alert alert-danger">Failed to load community events. Please try again later.</div>';
-    reportStatusDiv.textContent = "Error loading events.";
-    reportStatusDiv.className = "alert alert-danger";
-    reportStatusDiv.style.display = "block";
-  }
-}
-
 function renderCommunityEvents(events, newlyAddedEventIds = new Set()) {
   const previouslySelectedIds = new Set(
     Array.from(
@@ -290,7 +231,7 @@ function renderCommunityEvents(events, newlyAddedEventIds = new Set()) {
       <div class="d-flex w-100 justify-content-between align-items-start">
         <div>
           <h6 class="mb-1 fw-semibold">${
-            event.title || `Incident ${event.event_id}`
+            event.title || `#${event.event_id} ${event.event_type} `
           }</h6>
           <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
             <span class="badge ${getEventTypeBadgeClass(event.event_type)}">${
@@ -369,6 +310,7 @@ function ensureEnhancedStyles() {
   }
 }
 
+// Helper functions remain unchanged
 function getEventTypeBadgeClass(eventType) {
   const typeMap = {
     fire: "bg-danger",
@@ -427,6 +369,7 @@ function setupReportButton() {
   reportButton.addEventListener("click", handleReportButtonClick);
 }
 
+// Report submission functions remain unchanged
 async function handleReportButtonClick() {
   selectedEventIds = Array.from(
     document.querySelectorAll(

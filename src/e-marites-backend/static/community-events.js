@@ -120,10 +120,6 @@ function verifyEvent(eventId, buttonElement) {
       const parentItem = buttonElement.closest(".community-item");
       const badge = parentItem.querySelector(".badge");
 
-      badge.classList.remove("bg-danger");
-      badge.classList.add("bg-info");
-      badge.textContent = "Verified";
-
       buttonElement.innerHTML =
         '<i class="bi bi-check-circle-fill"></i> Verified';
 
