@@ -15,7 +15,7 @@ type EmergencyAlert struct {
 	Description         string       `json:"description"`
 	LocationDescription string       `json:"location_description"`
 	Coordinates         string       `json:"coordinates,omitempty"`
-	AssignedTeam        string       `json:"assigned_team"`
+	AssignedAgencyID    sql.NullInt64 `json:"assigned_agency_id,omitempty"`
 	Status              string       `json:"status"`
 	CreatedAt           time.Time    `json:"created_at,omitempty"`
 	UpdatedAt           time.Time    `json:"updated_at,omitempty"`
@@ -23,6 +23,7 @@ type EmergencyAlert struct {
 }
 
 type CreateEmergencyAlertsRequest struct {
-	EventIDs     []int  `json:"event_ids"`
-	AssignedTeam string `json:"assigned_team"`
+	EventIDs         []int `json:"event_ids"`
+	AssignedAgencyID int   `json:"assigned_agency_id"` // Agency ID to assign the alert to
+	NotifyFamily     bool  `json:"notify_family"`      // Flag to indicate if family should be notified
 }

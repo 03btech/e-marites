@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" href="assets/images/megaphone.svg" type="image/x-icon" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Community Events Dashboard</title>
     <link
@@ -25,16 +27,6 @@
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
-      .portal-header {
-        text-align: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #eee;
-      }
-      .portal-title {
-        color: #283444;
-        font-weight: 600;
-      }
       .info-bar {
         background-color: #283444;
         color: white;
@@ -45,47 +37,15 @@
         align-items: center;
         font-size: 0.95rem;
       }
-      .bi-arrow-left-circle {
-        color: #6c757d;
-        transition: color 0.2s;
+      .portal-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
       }
-
-      .bi-arrow-left-circle:hover {
+      .portal-title {
         color: #283444;
-      }
-
-      .info-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .info-icon {
-        font-size: 1.1rem;
-      }
-
-      @media (max-width: 992px) {
-        .info-bar {
-          flex-direction: column;
-          gap: 10px;
-          align-items: flex-start;
-        }
-
-        .info-item {
-          width: 100%;
-          justify-content: flex-start;
-        }
-      }
-
-      @media (max-width: 576px) {
-        .info-bar {
-          padding: 10px 15px;
-          font-size: 0.85rem;
-        }
-
-        .info-icon {
-          font-size: 1rem;
-        }
+        font-weight: 600;
       }
       .event-card {
         margin-bottom: 1.5rem;
@@ -191,36 +151,196 @@
       .modal-body {
         overflow-y: visible;
       }
+
+      /* Burger/Drawer Styles */
+      .top-bar {
+        background-color: #283444;
+        color: white;
+        padding: 0.5rem 0;
+      }
+      .top-bar .title {
+        flex-grow: 1;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+      .burger-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.8rem;
+        cursor: pointer;
+        padding: 5px 10px;
+        margin-left: 10px;
+      }
+      .nav-drawer {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 280px;
+        height: 100%;
+        background-color: #1a2b48;
+        color: white;
+        padding-top: 60px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        transition: left 0.3s ease;
+        z-index: 1050;
+        overflow-y: auto;
+      }
+      .nav-drawer.active {
+        left: 0;
+      }
+      .nav-drawer .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+      }
+      .nav-drawer ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .nav-drawer ul li a {
+        display: block;
+        padding: 15px 20px;
+        color: white;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .nav-drawer ul li a i {
+        margin-right: 10px;
+      }
+      .nav-drawer ul li a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      .nav-drawer .drawer-header {
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 10px;
+      }
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .overlay.active {
+        display: block;
+        opacity: 1;
+      }
+      @media (max-width: 768px) {
+        .nav-drawer {
+          width: 250px;
+          left: -250px;
+        }
+        .burger-btn {
+          font-size: 1.5rem;
+        }
+      }
+      .container {
+        padding-top: 20px;
+      }
+      #map-instructions-style {
+        display: none;
+      }
+      #edit-event-map-container-style {
+        height: 250px;
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="info-bar mb-3">
-        <div class="info-item">
-          <i class="bi bi-calendar info-icon"></i>
-          <span id="current-date">Loading date...</span>
-        </div>
-        <div class="info-item">
-          <i class="bi bi-geo-alt-fill info-icon"></i>
-          <span>BARANGAY POBLACION, CAUAYAN NEGROS OCCIDENTAL</span>
-        </div>
-        <div class="info-item">
-          <i class="bi bi-clock-fill info-icon"></i>
-          <span id="current-time">Loading time...</span>
+    <div class="top-bar">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+          <button
+            class="burger-btn"
+            id="burgerBtn"
+            aria-label="Open navigation menu"
+          >
+            <i class="bi bi-list"></i>
+          </button>
+          <div class="title text-center">Events Dashboard</div>
+          <div></div>
         </div>
       </div>
+    </div>
+    <div class="nav-drawer" id="navDrawer">
+      <button
+        class="close-btn"
+        id="closeDrawerBtn"
+        aria-label="Close navigation menu"
+      >
+        &times;
+      </button>
+      <div class="drawer-header">Navigation</div>
+      <ul>
+        <li>
+          <a href="index.html"><i class="bi bi-house"></i> Main Dashboard</a>
+        </li>
+        <li>
+          <a href="event_portal.html"
+            ><i class="bi bi-door-open"></i> Event Portal</a
+          >
+        </li>
+        <li>
+          <a href="events.html"
+            ><i class="bi bi-list-task"></i> Events Dashboard</a
+          >
+        </li>
+        <li>
+          <a href="management.html"
+            ><i class="bi bi-gear-fill"></i> Management</a
+          >
+        </li>
+        <li>
+          <hr class="dropdown-divider" />
+        </li>
+        <li>
+          <a href="#" id="logout-link-drawer"
+            ><i class="bi bi-box-arrow-right"></i> Log Out</a
+          >
+        </li>
+      </ul>
+    </div>
+    <div class="overlay" id="overlay"></div>
 
+    <div class="container">
+      <div class="info-container">
+        <div class="info-bar">
+          <div class="info-item">
+            <i class="bi bi-calendar info-icon"></i>
+            <span id="current-date">Loading date...</span>
+          </div>
+          <div class="info-item">
+            <i class="bi bi-geo-alt-fill info-icon"></i>
+            <span>BARANGAY POBLACION, CAUAYAN NEGROS OCCIDENTAL</span>
+          </div>
+          <div class="info-item">
+            <i class="bi bi-clock-fill info-icon"></i>
+            <span id="current-time">Loading time...</span>
+          </div>
+        </div>
+      </div>
       <div class="events-container">
         <div class="portal-header">
           <h2 class="portal-title">
             <i class="bi bi-list-task me-2"></i>Community Events Dashboard
           </h2>
           <p class="text-muted">View and manage reported community events</p>
-        </div>
-        <div class="mb-3">
-          <a href="index.html" class="text-decoration-none" title="Go back">
-            <i class="bi bi-arrow-left-circle fs-5"></i> Go to Main Dashboard
-          </a>
         </div>
         <div class="filter-section">
           <div class="row g-3">
@@ -435,17 +555,13 @@
                   </button>
                 </div>
                 <small class="text-muted">
-                  <span id="map-instructions" style="display: none">
+                  <span id="map-instructions">
                     <i class="bi bi-info-circle"></i> Drag the marker to update
                     location, then click "Save Changes"
                   </span>
                 </small>
               </div>
-              <div
-                id="edit-event-map-container"
-                style="height: 250px; display: none"
-                class="mb-3"
-              ></div>
+              <div id="edit-event-map-container" class="mb-3"></div>
             </form>
           </div>
           <div class="modal-footer">
@@ -484,6 +600,49 @@
 
       updateDateTime();
       setInterval(updateDateTime, 60000);
+
+      // Drawer Toggle Logic (Copied from index.html for consistency)
+      const burgerBtn = document.getElementById("burgerBtn");
+      const closeDrawerBtn = document.getElementById("closeDrawerBtn");
+      const navDrawer = document.getElementById("navDrawer");
+      const overlay = document.getElementById("overlay");
+
+      function openDrawer() {
+        navDrawer.classList.add("active");
+        overlay.classList.add("active");
+      }
+
+      function closeDrawer() {
+        navDrawer.classList.remove("active");
+        overlay.classList.remove("active");
+      }
+
+      if (burgerBtn && navDrawer && closeDrawerBtn && overlay) {
+        burgerBtn.addEventListener("click", openDrawer);
+        closeDrawerBtn.addEventListener("click", closeDrawer);
+        overlay.addEventListener("click", closeDrawer); // Close drawer when clicking overlay
+      }
+
+      // Optional: Close drawer if a link inside it is clicked + Logout Logic
+      const drawerLinks = navDrawer.querySelectorAll("a");
+      drawerLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          // Handle logout specifically
+          if (link.id === "logout-link-drawer") {
+            e.preventDefault(); // Prevent default link behavior
+            localStorage.removeItem("authToken");
+            window.location.href = "/login.html";
+            return; // Stop further execution for logout
+          }
+
+          // Don't close immediately for external links
+          if (!link.href.startsWith("#")) {
+            // Allow default navigation
+          } else {
+            closeDrawer(); // Close for internal links
+          }
+        });
+      });
     </script>
 
     <script src="js/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js"></script>

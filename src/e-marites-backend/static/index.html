@@ -505,61 +505,193 @@
           font-size: 1.5rem;
         }
       }
+
+      /* Burger Button Styles */
+      .burger-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.8rem;
+        cursor: pointer;
+        padding: 5px 10px;
+        margin-left: 10px; /* Adjust as needed */
+      }
+
+      /* Navigation Drawer Styles */
+      .nav-drawer {
+        position: fixed;
+        top: 0;
+        left: -280px; /* Start off-screen */
+        width: 280px;
+        height: 100%;
+        background-color: #1a2b48; /* Match top-bar or choose another */
+        color: white;
+        padding-top: 60px; /* Space for top bar */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        transition: left 0.3s ease;
+        z-index: 1050; /* Ensure it's above other content */
+        overflow-y: auto;
+      }
+
+      .nav-drawer.active {
+        left: 0; /* Slide in */
+      }
+
+      .nav-drawer .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+      }
+
+      .nav-drawer ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .nav-drawer ul li a {
+        display: block;
+        padding: 15px 20px;
+        color: white;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .nav-drawer ul li a i {
+        margin-right: 10px;
+      }
+
+      .nav-drawer ul li a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .nav-drawer .drawer-header {
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 10px;
+      }
+
+      /* Overlay for background dimming */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040; /* Below drawer, above content */
+        display: none; /* Hidden by default */
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .overlay.active {
+        display: block;
+        opacity: 1;
+      }
+
+      /* Hide original quick links dropdown and logout on larger screens if burger is present */
+      .top-bar .btn-group,
+      .top-bar .logout-icon {
+        /* display: none; /* Hide original elements */
+      }
+
+      /* Responsive adjustments if needed */
+      @media (max-width: 768px) {
+        /* Adjust drawer width or styles for smaller screens */
+        .nav-drawer {
+          width: 250px;
+          left: -250px;
+        }
+        .burger-btn {
+          font-size: 1.5rem;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="top-bar">
       <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center">
-          <div></div>
+          <button
+            class="burger-btn"
+            id="burgerBtn"
+            aria-label="Open navigation menu"
+          >
+            <i class="bi bi-list"></i>
+          </button>
 
           <div class="title text-center">
             Mishaps Dashboard
-            <div class="d-inline-block ms-3">
-              <div class="btn-group">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-light dropdown-toggle"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <i class="bi bi-menu-button"></i> Quick Links
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <a class="dropdown-item" href="event_portal.html"
-                      ><i class="bi bi-door-open"></i> Event Portal</a
-                    >
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="events.html"
-                      ><i class="bi bi-list-task"></i> Events Dashboard</a
-                    >
-                  </li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li>
-                    <a class="dropdown-item" href="#"
-                      ><i class="bi bi-house"></i> Main Dashboard</a
-                    >
-                  </li>
-                </ul>
-              </div>
-            </div>
+            <!-- Original Quick Links Dropdown Removed -->
           </div>
 
-          <div class="d-flex align-items-center">
-            <a
-              href="/logout"
-              class="icon logout-icon"
-              id="logout-btn"
-              title="Log Out"
-            >
-              <i class="bi bi-box-arrow-right text-white"></i>
-            </a>
-          </div>
+          <!-- Original Logout Icon Removed -->
+          <div></div>
+          <!-- Placeholder to balance flexbox -->
         </div>
       </div>
     </div>
+
+    <!-- Navigation Drawer -->
+    <div class="nav-drawer" id="navDrawer">
+      <button
+        class="close-btn"
+        id="closeDrawerBtn"
+        aria-label="Close navigation menu"
+      >
+        &times;
+      </button>
+      <div class="drawer-header">Navigation</div>
+      <ul>
+        <li>
+          <a href="event_portal.html"
+            ><i class="bi bi-door-open"></i> Event Portal</a
+          >
+        </li>
+        <li>
+          <a href="events.html"
+            ><i class="bi bi-list-task"></i> Events Dashboard</a
+          >
+        </li>
+        <li>
+          <a href="management.html"
+            ><i class="bi bi-gear-fill"></i> Management</a
+          >
+        </li>
+        <li>
+          <hr
+            class="dropdown-divider"
+            style="border-color: rgba(255, 255, 255, 0.2)"
+          />
+        </li>
+        <li>
+          <a href="#"><i class="bi bi-house"></i> Main Dashboard</a>
+        </li>
+        <li>
+          <hr
+            class="dropdown-divider"
+            style="border-color: rgba(255, 255, 255, 0.2)"
+          />
+        </li>
+        <li>
+          <a href="/logout" id="logout-link-drawer"
+            ><i class="bi bi-box-arrow-right"></i> Log Out</a
+          >
+        </li>
+      </ul>
+    </div>
+    <!-- End Navigation Drawer -->
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
 
     <div class="dashboard-container">
       <div class="card-row">
@@ -596,69 +728,41 @@
             </div>
 
             <div class="mb-2">
-              <label class="form-label fw-bold small">2. Select Agency:</label>
-              <fieldset id="agencySelection" class="border rounded p-2">
-                <legend class="visually-hidden">Agency Selection</legend>
+              <label class="form-label fw-bold small"
+                >2. Select Recipients:</label
+              >
+              <fieldset id="recipientSelection" class="border rounded p-2">
+                <legend class="visually-hidden">Recipient Selection</legend>
 
-                <div class="form-check form-check-inline">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="agency"
-                    id="agencyPolice"
-                    value="Police"
-                    required
-                  />
-                  <label class="form-check-label small" for="agencyPolice"
-                    >Police</label
-                  >
+                <!-- Placeholder for dynamic agency checkboxes -->
+                <div id="agency-recipients-container">
+                  <div class="text-center text-muted small p-2">
+                    Loading agencies...
+                  </div>
                 </div>
-                <div class="form-check form-check-inline">
+                <!-- End Placeholder -->
+
+                <hr class="my-2" />
+                <!-- Optional separator -->
+                <div class="form-check">
                   <input
                     class="form-check-input"
-                    type="radio"
-                    name="agency"
-                    id="agencyFire"
-                    value="Fire"
-                    required
+                    type="checkbox"
+                    name="recipient"
+                    id="recipientFamily"
+                    value="Family"
                   />
-                  <label class="form-check-label small" for="agencyFire"
-                    >Fire</label
-                  >
-                </div>
-                <div class="form-check form-check-inline">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="agency"
-                    id="agencyAmbulance"
-                    value="Ambulance"
-                    required
-                  />
-                  <label class="form-check-label small" for="agencyAmbulance"
-                    >Ambulance</label
-                  >
-                </div>
-                <div class="form-check form-check-inline">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="agency"
-                    id="agencyEmergency"
-                    value="EmergencyResponder"
-                    required
-                  />
-                  <label class="form-check-label small" for="agencyEmergency"
-                    >Emergency Resp.</label
+                  <label class="form-check-label small" for="recipientFamily"
+                    >Notify Reporter's Family (if available)</label
                   >
                 </div>
               </fieldset>
               <div
-                id="agencyError"
+                id="recipientError"
                 class="text-danger mt-1 small"
                 style="display: none"
               >
-                Please select an agency.
+                Please select at least one recipient.
               </div>
             </div>
 
@@ -827,6 +931,54 @@
 
       updateDateTime();
       setInterval(updateDateTime, 60000);
+
+      // Drawer Toggle Logic
+      const burgerBtn = document.getElementById("burgerBtn");
+      const closeDrawerBtn = document.getElementById("closeDrawerBtn");
+      const navDrawer = document.getElementById("navDrawer");
+      const overlay = document.getElementById("overlay");
+      // const mainContent = document.querySelector('.dashboard-container'); // Optional for content shift
+
+      function openDrawer() {
+        navDrawer.classList.add("active");
+        overlay.classList.add("active");
+        // document.body.classList.add('drawer-open'); // Optional for body class
+        // mainContent.style.marginLeft = navDrawer.offsetWidth + 'px'; // Optional content shift
+      }
+
+      function closeDrawer() {
+        navDrawer.classList.remove("active");
+        overlay.classList.remove("active");
+        // document.body.classList.remove('drawer-open'); // Optional for body class
+        // mainContent.style.marginLeft = '0'; // Optional content shift
+      }
+
+      if (burgerBtn && navDrawer && closeDrawerBtn && overlay) {
+        burgerBtn.addEventListener("click", openDrawer);
+        closeDrawerBtn.addEventListener("click", closeDrawer);
+        overlay.addEventListener("click", closeDrawer); // Close drawer when clicking overlay
+      }
+
+      // Optional: Close drawer if a link inside it is clicked
+      const drawerLinks = navDrawer.querySelectorAll("a");
+      drawerLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          // Handle logout specifically
+          if (link.id === "logout-link-drawer") {
+            e.preventDefault(); // Prevent default link behavior
+            localStorage.removeItem("authToken");
+            window.location.href = "/login.html";
+            return; // Stop further execution for logout
+          }
+
+          // Don't close immediately for external links
+          if (!link.href.startsWith("#")) {
+            // Allow default navigation
+          } else {
+            closeDrawer(); // Close for internal links
+          }
+        });
+      });
     </script>
 
     <script type="module" src="js/chart-config.js"></script>
@@ -839,5 +991,6 @@
     <script src="index.js"></script>
     <script src="metrics.js"></script>
     <script src="community-events.js"></script>
+    <script src="agency-loader.js"></script>
   </body>
 </html>

@@ -64,10 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
 const eventsListContainer = document.getElementById("communityEventsList");
 const reportButton = document.getElementById("reportButton");
 const reportStatusDiv = document.getElementById("reportStatus");
-const agencySelection = document.getElementById("agencySelection");
-const agencyErrorDiv = document.getElementById("agencyError");
+const recipientErrorDiv = document.getElementById("recipientError");
 let selectedEventIds = [];
-let selectedAgency = null;
+let selectedRecipients = [];
 let isSubmitting = false;
 let previousEventIds = new Set();
 
@@ -310,7 +309,6 @@ function ensureEnhancedStyles() {
   }
 }
 
-// Helper functions remain unchanged
 function getEventTypeBadgeClass(eventType) {
   const typeMap = {
     fire: "bg-danger",
@@ -369,7 +367,6 @@ function setupReportButton() {
   reportButton.addEventListener("click", handleReportButtonClick);
 }
 
-// Report submission functions remain unchanged
 async function handleReportButtonClick() {
   selectedEventIds = Array.from(
     document.querySelectorAll(
@@ -377,15 +374,52 @@ async function handleReportButtonClick() {
     )
   ).map((checkbox) => parseInt(checkbox.value));
 
-  const selectedAgencyRadio = document.querySelector(
-    'input[name="agency"]:checked'
+  // Add validation for selected events
+  if (selectedEventIds.length === 0) {
+    // Use reportStatusDiv or create a specific error div for events
+    reportStatusDiv.innerHTML = `
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-circle-fill text-warning fs-4"></i>
+        <div>
+          <h5 class="mb-1">Selection Required</h5>
+          <p class="mb-0">Please select at least one event to report.</p>
+        </div>
+      </div>
+    `;
+    reportStatusDiv.className = "alert alert-warning d-flex align-items-center";
+    reportStatusDiv.style.display = "block"; // Make sure it's visible
+    // Hide recipient error if it was shown
+    recipientErrorDiv.style.display = "none";
+    return; // Stop execution
+  }
+  // Hide event selection error if previously shown and it's not showing a success/fail message
+  if (reportStatusDiv.classList.contains("alert-warning")) {
+    reportStatusDiv.style.display = "none";
+  }
+
+  const selectedAgencyInput = document.querySelector(
+    '#agency-recipients-container input[name="recipient_agency"]:checked'
   );
-  if (!selectedAgencyRadio) {
-    agencyErrorDiv.textContent = "Please select an agency";
-    agencyErrorDiv.style.display = "block";
+  const selectedAgencyId = selectedAgencyInput
+    ? parseInt(selectedAgencyInput.value, 10)
+    : null;
+
+  const notifyFamilyChecked =
+    document.getElementById("recipientFamily")?.checked || false;
+
+  if (!selectedAgencyId && !notifyFamilyChecked) {
+    recipientErrorDiv.textContent =
+      "Please select at least one agency or the family option.";
+    recipientErrorDiv.style.display = "block";
     return;
   }
-  selectedAgency = selectedAgencyRadio.value;
+  recipientErrorDiv.style.display = "none";
+
+  if (!selectedAgencyId) {
+    recipientErrorDiv.textContent = "Please select a responding agency.";
+    recipientErrorDiv.style.display = "block";
+    return;
+  }
 
   if (isSubmitting) {
     console.log("Submission already in progress, ignoring click");
@@ -415,7 +449,11 @@ async function handleReportButtonClick() {
   }, 200);
 
   try {
-    await createEmergencyAlerts(selectedEventIds, selectedAgency);
+    await createEmergencyAlerts(
+      selectedEventIds,
+      selectedAgencyId,
+      notifyFamilyChecked
+    );
 
     const bar = progressBar.querySelector(".progress-bar");
     if (bar) {
@@ -429,7 +467,11 @@ async function handleReportButtonClick() {
         <i class="bi bi-check-circle-fill text-success fs-4"></i>
         <div>
           <h5 class="mb-1">Report Successful</h5>
-          <p class="mb-0">Created alerts for ${selectedEventIds.length} event(s) assigned to ${selectedAgency}.</p>
+          <p class="mb-0">Created alerts for ${
+            selectedEventIds.length
+          } event(s). ${
+      notifyFamilyChecked ? "Family notified. " : ""
+    }Assigned to agency ID: ${selectedAgencyId || "None"}</p>
         </div>
       </div>
     `;
@@ -468,24 +510,35 @@ async function handleReportButtonClick() {
   }
 }
 
-async function createEmergencyAlerts(eventIds, agency) {
+async function createEmergencyAlerts(eventIds, agencyId, notifyFamily) {
+  const payload = {
+    event_ids: eventIds.map((id) => parseInt(id, 10)),
+    assigned_agency_id: agencyId,
+    notify_family: notifyFamily,
+  };
+
+  console.log("Sending payload:", JSON.stringify(payload));
+
   const response = await fetch("/api/emergency-alerts", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      event_ids: eventIds.map((id) => parseInt(id, 10)),
-      assigned_team: agency,
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
     let errorMsg = `HTTP error! status: ${response.status}`;
     try {
       const errorData = await response.json();
-      errorMsg = errorData.message || errorData.error || errorMsg;
-    } catch (e) {}
+      console.error("Backend error details:", errorData);
+      errorMsg =
+        errorData.message ||
+        errorData.error ||
+        `Failed with status ${response.status}`;
+    } catch (e) {
+      console.error("Could not parse error response:", e);
+    }
     throw new Error(errorMsg);
   }
 
@@ -499,15 +552,20 @@ function clearSelections() {
       checkbox.checked = false;
     });
 
-  const selectedAgencyRadio = document.querySelector(
-    'input[name="agency"]:checked'
-  );
-  if (selectedAgencyRadio) {
-    selectedAgencyRadio.checked = false;
+  document
+    .querySelectorAll(
+      '#agency-recipients-container input[name="recipient_agency"]:checked'
+    )
+    .forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+
+  const familyCheckbox = document.getElementById("recipientFamily");
+  if (familyCheckbox) {
+    familyCheckbox.checked = false;
   }
 
   selectedEventIds = [];
-  selectedAgency = null;
-
-  agencyErrorDiv.style.display = "none";
+  selectedRecipients = [];
+  recipientErrorDiv.style.display = "none";
 }
